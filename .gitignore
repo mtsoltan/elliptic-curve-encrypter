@@ -1,0 +1,11 @@
+# dev stuff (IDE configs etc)
+**/.idea/
+**/desktop.ini
+**/__pycache__/
+
+# general extensions of files we dont want
+*.log
+*.db
+*.online
+*.orig
+todo
