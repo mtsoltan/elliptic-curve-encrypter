@@ -1,4 +1,4 @@
-# Reused from http://anh.cs.luc.edu/331/code/mod_arith.py and edited heavily.
+# Build on top of code from http://anh.cs.luc.edu/331/code/mod_arith.py
 
 from xgcd import xgcd
 
@@ -42,9 +42,65 @@ class Mod(AnyMod):  # AnyMod is for backwards compatibility
 
     def is_residue(self):
         """Return whether the square root of the number exists."""
-        if self.value ** ((self.m - 1) / 2) != 1:
-            return False
-        return True
+        if self ** ((self.m - 1) >> 1) == 1:
+            return True  # Legendre says 1.
+        return False  # Legendre says -1.
+
+    def sqrt(self):
+        """A direct application of Tonelli-Shanks algorithm. Returns a tuple of both roots"""
+        assert self.is_residue(), 'Square roots can only be taken for quadratic residues.'
+        if self.value == 0:
+            sqrt = Mod(0, self.m)
+            return sqrt, -sqrt
+        if self.m == 2:
+            sqrt = Mod(2, self.m)
+            return sqrt, -sqrt
+        if self.m & 0b11 == 3:
+            sqrt = self ** ((self.m + 1) >> 2)
+            return sqrt, -sqrt
+
+        # Reduce all the powers of 2 from p - 1.
+        s = self.m - 1
+        e = 0
+        while s & 1 == 0:
+            s = s >> 1
+            e += 1
+
+        # Find some 'n' with a legendre symbol n|p = -1.
+        temp = self.value
+        self.value = 2
+        while self.is_residue():
+            self.value += 1
+        n = self.value
+        self.value = temp
+
+        # Read the paper "Square roots from 1; 24, 51, 10 to Dan Shanks"
+        # by Ezra Brown for more information.
+
+        # x is a guess of the square root that gets better with each iteration.
+        # b is the "fudge factor" - by how much we're off with the guess.
+        # The invariant x^2 = ab (mod p) is maintained throughout the loop.
+        # g is used for successive powers of n to update both a and b.
+        # r is the exponent - decreases with each update
+        x = pow(self.value, (s + 1) >> 1, self.m)
+        b = pow(self.value, s, self.m)
+        g = pow(n, s, self.m)
+        r = e
+        while True:
+            t = b
+            m = 0
+            for m in range(r):
+                if t == 1:
+                    break
+                t = pow(t, 2, self.m)
+            if m == 0:
+                sqrt = Mod(x, self.m)
+                return sqrt, -sqrt
+            gs = pow(g, 2 ** (r - m - 1), self.m)
+            g = (gs * gs) % self.m
+            x = (x * gs) % self.m
+            b = (b * g) % self.m
+            r = m
 
     def __str__(self):  # used by str built-in function, which is used by print
         """Return an informal string representation of object"""
@@ -52,7 +108,7 @@ class Mod(AnyMod):  # AnyMod is for backwards compatibility
 
     def __repr__(self):  # used by repr built-in function
         """Return a formal string representation, usable in the Shell"""
-        return f"Mod({self.value}, {self.m})"
+        return f"{self.value}"
 
     def same_param(self, other):
         """True if other is a Mod with same modulus"""
@@ -129,14 +185,6 @@ class Mod(AnyMod):  # AnyMod is for backwards compatibility
             s = s.inverse()
             n = abs(n)
         return Mod(pow(s.value, n, s.m), s.m)
-        # # algorithm (but not in C):
-        # result = Mod(1, self.m)
-        # while n > 0:
-        #    if n % 2 == 1:
-        #       result = s * result
-        #    s = s * s  # compute the next square
-        #    n = n//2    # compute the next quotient
-        # return result
 
     def __int__(self):
         """Return lowest non-negative integer representative."""
