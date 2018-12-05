@@ -55,3 +55,6 @@ def main() -> int:
         if not do_operation(opcode, curve, operation):
             print("The operation given was not understood by the program.")
     return 0
+
+if __name__ == "__main__":
+    main()
