@@ -111,6 +111,6 @@ class Curve:
         while k > 0:
             if k & 1:
                 q = self.add(q, n)
-            n = self.add(q, q)
+            n = self.add(n, n)
             k >>= 1
         return q
