@@ -1,5 +1,7 @@
 #! /usr/bin/python
 
+# Reused from https://anh.cs.luc.edu/331/code/xgcd.py and edited heavily.
+
 
 def gcd(a, b):
     """

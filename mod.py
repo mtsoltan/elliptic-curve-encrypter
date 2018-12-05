@@ -1,4 +1,4 @@
-# Reused from http://anh.cs.luc.edu/331/code/mod_arith.py
+# Reused from http://anh.cs.luc.edu/331/code/mod_arith.py and edited heavily.
 
 from xgcd import xgcd
 
