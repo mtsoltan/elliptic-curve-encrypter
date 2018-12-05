@@ -1,50 +1,15 @@
-# TODO: Implement multiplication (irreversible trapdoor function).
 from typing import Tuple, Union, Optional
-
 from mod import Mod
 
-Point = Union[Tuple[Union[float, Mod], Union[float, Mod]], bool]
+Coordinate = Union[float, Mod]
+IntableCoordinate = Union[float, int, Mod]
+Point = Union[Tuple[Coordinate, Coordinate], bool]
 ModularPoint = Union[Tuple[Mod, Mod], bool]
 O: Point = False  # Point at infinity.
 
-P_secp265k1 = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F"  # 256 bits field prime.
-A_secp265k1 = 0
-B_secp265k1 = 7
-G_secp265k1 = "0279BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798"  # 264 bits base point (Gx, Gy).
-N_secp265k1 = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141"  # 256 bits order of base point.
-H_secp265k1 = 1  # The cofactor of base point.
-
-"""
-Rules:
-Kpub = Kpriv x G
-Private keys are randomly generated, usually iterative operation of a cryptographic hash function to a password.
-Hash functions are designed in such a way to provide a bitstream of sufficient length to form a key.
-
-G is used as the generator for public keys. Multiplication is straightforward through the double-and-add method.
-Private keys cannot be recreated since multiplication is irreversible.
-
-For a fixed set of paramters T = (P, A, B, G, N, H), to sign a message, m (ECDSA):
-1- Randomly generate Kpriv (int), and generate Kpub = Kpriv x G (point).
-2- Select a random integer k, 1 < k <= N - 1.
-3- Compute r = (k * G).x mod N
-   * where multiplication is over the elliptic curve (A, B, P)
-   * where if r == 0 go to step 1.
-4- Compute inv(k) using xgcd, and SHA1(m) as a 160-bit integer.
-5- Compue s = inv(k) * (SHA1(m) + Kpriv * r) mod N
-   * where if s == 0 go to step 1.
-6- The signature is (r, s).
-
-To verify the signature (r, s) given Kpub:
-1- Verify that r, s are integers in the interval [1, n - 1]
-2- Compute inv(s) using xgcd, and SHA1(m) as a 160-bit integer.
-3- Compute u1 = inv(s) * SHA1(m) mod N and u2 = inv(s) * r mod N
-4- Compute x = (u1 * G + u2 * Kpub).x mod N.
-5- Accept if x == r.
-"""
-
 
 class Curve:
-    def __init__(self, a: Union[int, float], b: Union[int, float], p: Optional[int]=None):
+    def __init__(self, a: IntableCoordinate, b: IntableCoordinate, p: Optional[int]):
         """
         Initializes the curve, y**2 = x**3 + a*x + b taking into
         account whether it is over a finite or an infinite field.
@@ -55,7 +20,6 @@ class Curve:
         if self.P:
             self.A = Mod(int(self.A), self.P)
             self.B = Mod(int(self.B), self.P)
-            self.G = 0  # TODO: Lookup generators.
         else:
             self.A = float(self.A)
             self.B = float(self.B)
@@ -66,7 +30,39 @@ class Curve:
         """
         if self.P is None:
             raise ValueError("This function can only be used on a finite field curve.")
+        if p == O:
+            return True
         return p[0] ** 3 + p[0] * self.A + self.B == p[1] ** 2
+
+    def find_y(self, x: IntableCoordinate) -> Point:  # Both y values so technically a tuple.
+        """
+        Finds whether the point p lies on this curve.
+        """
+        if self.P is None:
+            y = (x ** 3 + x * self.A + self.B) ** 0.5
+            return y, -y
+        assert isinstance(x, (int, Mod)), "Finite field curves cannot have a non-integer coordinate."
+        y1, y2 = Mod(x ** 3 + x * self.A + self.B, self.P).sqrt()
+        return y1, y2
+
+    def list_points(self):
+        """
+        WARNING: ONLY USE THIS FOR SMALL CURVES.
+        Loops over all possible x coordinates in the field, and finds out y values if they exist.
+        Returns a set of all possible coordinates on the curve.
+        """
+        if self.P is None:
+            raise ValueError('This function can only be used on a finite field curve.')
+        rv = []
+        for x in range(self.P):
+            try:
+                y1, y2 = self.find_y(x)
+                x = Mod(x, self.P)
+                rv.append((x, y1))
+                rv.append((x, y2))
+            except AssertionError:
+                continue
+        return rv
 
     def modulate(self, p: Point) -> ModularPoint:
         """
