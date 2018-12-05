@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-# Reused from https://anh.cs.luc.edu/331/code/xgcd.py and edited heavily.
+# Built on top of code from https://anh.cs.luc.edu/331/code/xgcd.py
 
 
 def gcd(a, b):
