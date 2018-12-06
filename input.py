@@ -1,6 +1,6 @@
 from tries import try_for_int, try_for_float
 from typing import List, Union
-from curve import O, Point
+from Curve import O, Point
 
 
 def parse_input() -> List[str]:

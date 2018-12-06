@@ -1,4 +1,4 @@
-from curve import Curve
+from Curve import Curve
 from input import *
 
 
@@ -44,7 +44,6 @@ def main() -> int:
     if curve.P:
         print(f" on the prime field with P={curve.P}")
 
-    s = 1  # Initial value for the while.
     while True:
         print("Insert an operation (add, mul, pts, fiy, exit): ")
         operation = parse_input()
@@ -55,6 +54,7 @@ def main() -> int:
         if not do_operation(opcode, curve, operation):
             print("The operation given was not understood by the program.")
     return 0
+
 
 if __name__ == "__main__":
     main()

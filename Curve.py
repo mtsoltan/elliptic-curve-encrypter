@@ -1,5 +1,5 @@
 from typing import Tuple, Union, Optional
-from mod import Mod
+from Mod import Mod
 
 Coordinate = Union[float, Mod]
 IntableCoordinate = Union[float, int, Mod]
