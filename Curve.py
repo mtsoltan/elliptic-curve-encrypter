@@ -16,22 +16,28 @@ class Curve:
         """
         self.A = a
         self.B = b
-        self.P = int(p)
+        self.P = p
+        assert p is None or (isinstance(a, (int, Mod)) and isinstance(b, (int, Mod))),\
+            "Finite field curves can only have integer values of a and b."
         if self.P:
-            self.A = Mod(int(self.A), self.P)
-            self.B = Mod(int(self.B), self.P)
+            assert isinstance(p, int), "Only integer values of p are allowed."
+            self.P = int(p)
+            self.A = Mod(self.A, self.P)
+            self.B = Mod(self.B, self.P)
         else:
             self.A = float(self.A)
             self.B = float(self.B)
 
-    def find(self, p: ModularPoint) -> bool:
+    def find(self, p: Point) -> bool:
         """
         Finds whether the point p lies on this curve.
         """
-        if self.P is None:
-            raise ValueError("This function can only be used on a finite field curve.")
         if p == O:
             return True
+        if self.P:
+            assert isinstance(p[0], (Mod, int)) and isinstance(p[1], (Mod, int)),\
+                "Only modular points can be found on a finite field curve."
+            p = (Mod(p[0], self.P), Mod(p[1], self.P))
         return p[0] ** 3 + p[0] * self.A + self.B == p[1] ** 2
 
     def find_y(self, x: IntableCoordinate) -> Point:  # Both y values so technically a tuple.
@@ -42,8 +48,7 @@ class Curve:
             y = (x ** 3 + x * self.A + self.B) ** 0.5
             return y, -y
         assert isinstance(x, (int, Mod)), "Finite field curves cannot have a non-integer coordinate."
-        y1, y2 = Mod(x ** 3 + x * self.A + self.B, self.P).sqrt()
-        return y1, y2
+        return Mod(x ** 3 + x * self.A + self.B, self.P).sqrt()
 
     def list_points(self):
         """

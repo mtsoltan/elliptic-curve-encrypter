@@ -1,26 +1,23 @@
-from tries import try_for_int, try_for_float
+from tries import try_for_int, try_for_number
 from typing import List, Union
-from Curve import O, Point
+from Curve import O, Point, Curve
 
 
 def parse_input() -> List[str]:
     return input().split()
 
 
-def read_point(inputs: List[str]) -> Point:
+def read_point(inputs: List[str], curve: Curve) -> Point:
     x = inputs.pop(0)
     if x == 'O':
         return O
-    try:
-        float(x)
-    except ValueError:
-        raise ValueError("Input is not in the correct format for read_point.")
+    x = try_for_number(x)
     y = inputs.pop(0)
-    try:
-        float(y)
-    except ValueError:
-        raise ValueError("Input is not in the correct format for read_point.")
-    p = (float(x), float(y))
+    y = try_for_number(y)
+    p = (x, y)
+    assert curve.find(p), "The point we are trying to read in read_point was not found on the curve."
+    if curve.P:
+        return curve.modulate(p)
     return p
 
 
@@ -31,7 +28,5 @@ def read_int(inputs: List[str]) -> int:
 
 def read_number(inputs: List[str]) -> Union[float, int]:
     n = inputs.pop(0)
-    if '.' in n:
-        return try_for_float(n)
-    return try_for_int(n)
+    return try_for_number(n)
 

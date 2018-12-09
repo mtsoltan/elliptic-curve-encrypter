@@ -1,3 +1,6 @@
+from typing import Union
+
+
 def try_for_int(n: str):
     try:
         int(n)
@@ -16,3 +19,10 @@ def try_for_float(n: str):
         return float(n)
     except ValueError:
         raise ValueError("Input is not in the correct format for try_for_float.")
+
+
+def try_for_number(n: str) -> Union[float, int]:
+    if '.' in n:
+        return try_for_float(n)
+    return try_for_int(n)
+

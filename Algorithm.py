@@ -43,6 +43,9 @@ class Algorithm:
 
     @staticmethod
     def random_number(blen: int) -> int:  # len is in bits
+        """
+        Returns cryptographically secure random numbers, unlike the built-in random() of python.
+        """
         blen = (blen & 111) + (blen >> 3)  # Divide by 8 and round up.
         ord_array = map(ord, urandom(blen))
         rv = 0
