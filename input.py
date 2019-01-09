@@ -3,6 +3,12 @@ from typing import List, Union
 from Curve import O, Point, Curve
 
 
+def represent_point(p: Point) -> str:
+    if p == O:
+        return 'O'
+    return f"({p[0]}, {p[1]})"
+
+
 def parse_input() -> List[str]:
     return input().split()
 
