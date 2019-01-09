@@ -1,5 +1,6 @@
 # import sys
-from Curve_test import main
+from Algorithm_test import main
+from os import urandom
 
 if __name__ == "__main__":
     main()

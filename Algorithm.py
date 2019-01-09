@@ -5,10 +5,11 @@ hashlib.sha256(data).digest()
 """
 import hashlib
 from os import urandom
-from typing import Dict
+from typing import Dict, Tuple
 from Curve import Curve
 from Mod import Mod
 
+Signature = Tuple[int, int]
 
 secp256k1 = {
     'P': 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F,  # 256 bit field prime.
@@ -34,12 +35,13 @@ class Algorithm:
         self.D = paramters
         self.curve = Curve(self.D['A'], self.D['B'], self.D['P'])
         self.G = (Mod(self.D['Gx'], self.D['P']), Mod(self.D['Gy'], self.D['P']))
-        self.kpriv = self.int2xsha256(password)
+        self.N = self.D['N']
+        self.kpriv = self.intsha256(password)
         self.kpub = self.curve.multiply(self.G, self.kpriv)
 
     @staticmethod
-    def int2xsha256(text: str) -> int:
-        return int(hashlib.sha256(hashlib.sha256(text).digest()).hexdigest(), 16)
+    def intsha256(text: str) -> int:
+        return int(hashlib.sha256(text.encode('utf-8')).hexdigest(), 16)
 
     @staticmethod
     def random_number(blen: int) -> int:  # len is in bits
@@ -47,9 +49,8 @@ class Algorithm:
         Returns cryptographically secure random numbers, unlike the built-in random() of python.
         """
         blen = (blen & 111) + (blen >> 3)  # Divide by 8 and round up.
-        ord_array = map(ord, urandom(blen))
         rv = 0
-        for e in ord_array:
+        for e in urandom(blen):
             rv += e
             rv <<= 8
         return rv & ((1 << blen) - 1)
@@ -78,8 +79,30 @@ class Algorithm:
                 break
         return self.ALPHANUM[0] * n_pad + result
 
-    def sign(self, message: str) -> str:
-        return ''
+    def sign(self, message: str) -> Signature:
+        k: int = self.random_number(255)  # TODO: HMAC Generation from hash of message.
+        if k > self.N:  # Random number generation is constructed in such a way that this is impossible.
+            return self.sign(message)  # But we can't always assume that RNG won't change.
+        r: Mod = Mod(self.curve.multiply(self.G, k)[0].value, self.N)  # Reduction modulo N is important.
+        if r == 0:  # A computationally impossible but theoretically possible case. WARNING: Mod to int comparison.
+            return self.sign(message)
+        t1: Mod = self.intsha256(message) + self.kpriv * r
+        s: Mod = Mod(k, self.N).inverse() * t1.value
+        if s == 0:  # Again, computationally impossible but theoretically possible. WARNING: Mod to int comparison.
+            return self.sign(message)
+        assert isinstance(r, Mod) and isinstance(s, Mod), "Signature final values have to be Mods."
+        return r.value, s.value
 
-    def verify(self, message: str, signature: str) -> bool:
+    def verify(self, message: str, signature: Signature) -> bool:
+        r, s = signature
+        if r > self.N - 1 or r < 1:
+            return False
+        if s > self.N - 1 or s < 1:
+            return False
+        inv: Mod = Mod(s, self.N).inverse()  # Conversion to Mod happens here. r is still int.
+        u1: Mod = inv * self.intsha256(message)
+        u2: Mod = inv * r
+        x: Mod = self.curve.add(self.curve.multiply(self.G, u1.value), self.curve.multiply(self.kpub, u2.value))[0]
+        if x.value == r:
+            return True
         return False
