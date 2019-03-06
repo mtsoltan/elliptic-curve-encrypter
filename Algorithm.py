@@ -1,9 +1,4 @@
-"""
-import ecdsa
-import base64
-hashlib.sha256(data).digest()
-"""
-import hashlib
+from hashlib import sha256
 from os import urandom
 from typing import Dict, Tuple
 from Curve import Curve
@@ -23,6 +18,9 @@ secp256k1 = {
     'H': 1   # The cofactor of base point.
 }
 
+# TODO: Abstract hash function and random_number length to an object called sha256.
+# TODO: Make functions that return valid string-based signatures and PEM keys.
+# TODO: Build own sha256 mock to remove the need of importing hashlib sha256.
 
 
 class ECDSA:
@@ -42,7 +40,7 @@ class ECDSA:
 
     @staticmethod
     def intsha256(text: str) -> int:
-        return int(hashlib.sha256(text.encode('utf-8')).hexdigest(), 16)
+        return int(sha256(text.encode('utf-8')).hexdigest(), 16)
 
     @staticmethod
     def random_number(blen: int) -> int:  # len is in bits
@@ -56,7 +54,7 @@ class ECDSA:
             rv <<= 8
         return rv & ((1 << blen) - 1)
 
-    def b58encode(self, v):
+    def b58encode(self, v):  # TODO: This isn't used as of now. Will be used soon, change to base64 encoding.
         """
         Encodes v, which is a string of bytes, to base58.
         """

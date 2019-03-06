@@ -1,3 +1,5 @@
+Todo: Point mapping, true asymmetric encryption, ec elgamal, ecdh, standardize ecdsa with HMACs and stuff, self-build hash function (discard all libraries, with options to include them instead, and tests that compare results to them), fast multiplication (double and add), fast inverse computation, gf2k curves, fast gf2k curve multiplication/inverse computation (paper)
+
 Rules:
 Kpub = Kpriv x G
 Private keys are randomly generated, usually iterative operation of a cryptographic hash function to a password.
