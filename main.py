@@ -1,6 +1,4 @@
-# import sys
-from Algorithm_test import main
-from os import urandom
+from Algorithm_test import test_ecdsa
 
 if __name__ == "__main__":
-    main()
+    test_ecdsa()
