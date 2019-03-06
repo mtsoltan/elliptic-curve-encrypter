@@ -44,6 +44,8 @@ class Mod(AnyMod):  # AnyMod is for backwards compatibility
         """Return whether the square root of the number exists."""
         if self ** ((self.m - 1) >> 1) == 1:
             return True  # Legendre says 1.
+        if self == 0:
+            return True  # 0 always has a square root even if it technically isn't a residue.
         return False  # Legendre says -1.
 
     def sqrt(self):

@@ -64,7 +64,8 @@ class Curve:
                 y1, y2 = self.find_y(x)
                 x = Mod(x, self.P)
                 rv.append((x, y1))
-                rv.append((x, y2))
+                if y1 != 0:
+                    rv.append((x, y2))
             except AssertionError:
                 continue
         return rv
