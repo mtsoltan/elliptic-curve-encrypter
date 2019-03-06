@@ -80,8 +80,9 @@ class ECDSA:
                 break
         return self.ALPHANUM[0] * n_pad + result
 
-    def sign(self, message: str) -> Signature:
-        k: int = self.random_number(255)  # TODO: HMAC Generation from hash of message.
+    def sign(self, message: str, k: int = None) -> Signature:
+        if k is None:
+            k: int = self.random_number(255)  # TODO: HMAC Generation from hash of message in some RFC algorithm class.
         if k > self.N:  # Random number generation is constructed in such a way that this is impossible.
             return self.sign(message)  # But we can't always assume that RNG won't change.
         r: Mod = Mod(self.curve.multiply(self.G, k)[0].value, self.N)  # Reduction modulo N is important.
