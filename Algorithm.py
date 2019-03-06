@@ -24,7 +24,8 @@ secp256k1 = {
 }
 
 
-class Algorithm:
+
+class ECDSA:
     ALPHANUM = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
     BASE = len(ALPHANUM)  # 58
 

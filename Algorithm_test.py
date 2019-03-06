@@ -1,11 +1,11 @@
 from input import *
-from Algorithm import secp256k1, Algorithm
+from Algorithm import secp256k1, ECDSA
 
 
 def main() -> int:
     print("Type a password you want to generate a key from:")
     password = input()
-    alg = Algorithm(secp256k1, password)
+    alg = ECDSA(secp256k1, password)
     print(f"Your private key is {alg.kpriv} and the respective public key is {represent_point(alg.kpub)}.")
     while True:
         print("Type a message you want to sign (or type exit to exit):")
