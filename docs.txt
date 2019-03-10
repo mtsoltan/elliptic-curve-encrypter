@@ -1,6 +1,18 @@
 Todo: Point mapping, true asymmetric encryption, ec elgamal, ecdh, standardize ecdsa with HMACs and stuff, self-build hash function (discard all libraries, with options to include them instead, and tests that compare results to them), fast multiplication (double and add), fast inverse computation, gf2k curves, fast gf2k curve multiplication/inverse computation (paper)
 
+ECDSA:
+TODO: Abstract hash function and random_number length to an object called sha256.
+TODO: Make functions that return valid string-based signatures and PEM keys.
+TODO: Build own sha256 mock to remove the need of importing hashlib sha256.
+
+Curve:
+TODO: Modern curves implementations of Curve() addition, multiplication, doubling etc.
+TODO: Double-and-add for speed, fast inverses, fast products, fast Stein's xgcd, fast implementations
+TODO: Eventually, rewrite it in assembly!
+
 Rules:
+Cofactor of base point is the ratio between the curve order #E(Fp) and the base point order n.
+
 Kpub = Kpriv x G
 Private keys are randomly generated, usually iterative operation of a cryptographic hash function to a password.
 Hash functions are designed in such a way to provide a bitstream of sufficient length to form a key.
